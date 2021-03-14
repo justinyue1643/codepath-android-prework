@@ -2,16 +2,23 @@ package com.example.simpletodo
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.simpletodo.databinding.ActivityMainBinding
 import com.example.simpletodo.todolist.ToDoListAdapter
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FileUtils.readLines
+import org.apache.commons.io.FileUtils.writeLines
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.nio.charset.Charset
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ToDoListAdapter
+    private lateinit var tasks: MutableList<String>
 
-    private var tasks = mutableListOf<String>("hello", "world")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,15 +30,19 @@ class MainActivity : AppCompatActivity() {
         val submitButton = binding.submitButton
         submitButton.setOnClickListener { view -> onSubmit(submitField.text.toString()) }
 
+//        tasks = mutableListOf()
+        loadItems()
+
         val taskList = binding.taskList
         val onItemLongClicked: (Int) -> Boolean = { position ->
             tasks.removeAt(position)
             adapter.notifyItemRemoved(position)
+            saveItems()
+            println(getDataFile().toString())
             true
         }
 
         adapter = ToDoListAdapter(tasks, onItemLongClicked)
-
 
         taskList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         taskList.adapter = adapter
@@ -40,12 +51,31 @@ class MainActivity : AppCompatActivity() {
     fun onSubmit(newTask: String) {
         tasks.add(newTask)
         adapter.notifyItemInserted(tasks.size - 1)
+        saveItems()
     }
 
+    private fun getDataFile() : File {
+        return File(filesDir, "data.txt")
+    }
 
-//    class RemoveListener : ToDoListAdapter.OnLongClickListener {
-//        override fun onItemLongClicked(position: Int): Boolean {
-//
-//        }
-//    }
+    private fun loadItems() {
+        try {
+            val charList = mutableListOf(FileUtils.readLines(getDataFile(), Charset.defaultCharset()))
+            tasks = charList.toMutableList()[0]
+        }
+        catch (e: FileNotFoundException) {
+            Log.e("MainActivity", "Error reading items", e)
+            tasks = mutableListOf()
+        }
+    }
+
+    private fun saveItems() {
+        try {
+            FileUtils.writeLines(getDataFile(), tasks)
+        }
+        catch (e: FileNotFoundException) {
+            Log.e("MainActivity", "Error writing items", e)
+        }
+    }
+
 }
