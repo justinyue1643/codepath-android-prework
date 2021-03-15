@@ -16,10 +16,6 @@ class ToDoListAdapter(dataset: List<String>, onLongClickListener: (Int) -> Boole
         this.onLongClickListener = onLongClickListener
     }
 
-    interface OnLongClickListener {
-        fun onItemLongClicked(position: Int) : Boolean
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.task_viewholder, parent, false)
         return TaskHolder(view, onLongClickListener)
