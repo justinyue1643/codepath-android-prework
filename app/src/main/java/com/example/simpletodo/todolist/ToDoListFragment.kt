@@ -78,6 +78,7 @@ class ToDoListFragment : Fragment() {
 
         if (realPosition != -1 && newTaskName != null) {
             tasks.set(realPosition, newTaskName)
+            saveItems()
         }
 
         adapter = ToDoListAdapter(tasks, onItemLongClicked, itemOnClicked)
